@@ -1,7 +1,9 @@
 export type PostDto = {
-    // data contract
-    title: string;
-    body: string;
-    userId: number;
-  };
-  
+  // data contract
+  id: number;
+  title: string;
+  body: string;
+  updatedOn: Date;
+  createdOn: Date;
+  // userId: number;
+};

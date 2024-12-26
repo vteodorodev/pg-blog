@@ -26,7 +26,25 @@ export async function getPosts(
   return mapPostResult(res);
 }
 
-export async function countPosts() {
+export async function getPostById(id: number): Promise<PostDto> {
+  const sql = `SELECT id, title, content, created_on, updated_on
+               FROM posts
+               WHERE id = ${id};
+              `;
+  const res = await client.query(sql);
+  return mapPostResult(res)[0];
+}
+
+export async function searchPostByString(word: string): Promise<PostDto[]> {
+  const sql = `SELECT *
+               FROM posts
+               WHERE to_tsvector(title) @@ to_tsquery('${word}')
+                OR to_tsvector(content) @@ to_tsquery('${word}');`;
+  const res = await client.query(sql);
+  return mapPostResult(res);
+}
+
+export async function countPosts(): Promise<number> {
   const sql = `SELECT COUNT(*)
                FROM posts;
               `;

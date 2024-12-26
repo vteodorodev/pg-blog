@@ -1,5 +1,10 @@
 import { Router } from 'express';
-import { countPosts, getPosts } from '../pg/Post';
+import {
+  countPosts,
+  getPostById,
+  getPosts,
+  searchPostByString,
+} from '../pg/Post';
 
 const router = Router();
 
@@ -37,6 +42,51 @@ router.get('/', async (req, res) => {
   } catch (error) {
     console.log(error);
   }
+});
+
+/*
+ * GET /
+ * Post :id
+ */
+
+router.get('/post/:id', async (req, res) => {
+  const postId = Number.parseInt(req.params.id as string);
+
+  try {
+    const data = await getPostById(postId);
+    const locals = { ...defaultLocals, title: data.title };
+    console.log(data);
+    res.render('post', { locals, data });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+/*
+ * GET /
+ * Post :id
+ */
+
+router.get('/search', async (req, res) => {
+  const locals = defaultLocals;
+  const searchTerm = req.query.searchTerm as string;
+
+  try {
+    const data = await searchPostByString(searchTerm);
+    res.render('search', { locals, data });
+  } catch (error) {
+    console.log(error);
+  }
+  // const postId = Number.parseInt(req.params.id as string);
+
+  // try {
+  //   const data = await getPostById(postId);
+  //   const locals = { ...defaultLocals, title: data.title };
+  //   console.log(data);
+  //   res.render('post', { locals, data });
+  // } catch (error) {
+  //   console.log(error);
+  // }
 });
 
 module.exports = router;

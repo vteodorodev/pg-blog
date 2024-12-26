@@ -1,6 +1,7 @@
-import { Client, type QueryResult } from 'pg';
+import { DatabaseError, type QueryResult } from 'pg';
 import type { UserDto } from '../models/UserDto';
 import { client } from '../db';
+import { UserError } from '../errors';
 
 function mapUserResult(res: QueryResult): UserDto[] {
   return res.rows.map((r) => ({
@@ -9,6 +10,22 @@ function mapUserResult(res: QueryResult): UserDto[] {
     id: r.id,
     email: r.email,
   }));
+}
+
+export async function createUser(username: string, hashedPassword: string) {
+  const sql = `
+    INSERT INTO users (username, password) 
+    VALUES ('${username}', '${hashedPassword}');
+    `;
+
+  try {
+    return await client.query(sql);
+  } catch (error: unknown) {
+    if (error instanceof DatabaseError) {
+      throw new UserError(error.code, UserError.USER_EXISTS_MESSAGE);
+    }
+    throw error;
+  }
 }
 
 export async function getUserByName(username: string): Promise<UserDto[]> {

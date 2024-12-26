@@ -5,6 +5,7 @@
     --gray: #7e7e7e;
     --gray-light: #e4e4e4;
     --red: #b30000;
+    --font-size-sm: 0.75rem;
     --font-size-base: 1rem;
     --font-size-md: clamp(1.25rem, 0.61vw + 1.1rem, 1.58rem);
     --font-size-lg: clamp(1.56rem, 1vw + 1.31rem, 2.11rem);
@@ -337,4 +338,10 @@ img {
     display: flex;
     justify-content: space-between;
     padding: 10px 0;
+}
+
+form .error {
+    display: block;
+    color: var(--red);
+    font-size: var(--font-size-sm);
 }

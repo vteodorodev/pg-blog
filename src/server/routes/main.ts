@@ -64,7 +64,7 @@ router.get('/post/:id', async (req, res) => {
 
 /*
  * GET /
- * Post :id
+ * Search
  */
 
 router.get('/search', async (req, res) => {

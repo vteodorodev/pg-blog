@@ -1,12 +1,12 @@
 {
   "name": "pg-blog",
   "version": "1.0.0",
-  "main": "dist/index.js",
+  "main": "dist/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc",
-    "start": "node dist/index.js",
-    "dev": "nodemon src/index.ts"
+    "start": "node dist/app.js",
+    "dev": "nodemon src/app.ts"
   },
   "keywords": [],
   "author": "",
@@ -14,17 +14,23 @@
   "description": "",
   "dependencies": {
     "@types/pg": "^8.11.10",
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
     "express": "^4.21.2",
     "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.18.1",
     "method-override": "^3.0.0",
     "pg": "^8.13.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.8",
     "@types/express": "^5.0.0",
     "@types/express-ejs-layouts": "^2.5.4",
+    "@types/express-session": "^1.18.1",
     "@types/method-override": "^3.0.0",
     "@types/node": "^22.10.2",
     "concurrently": "^9.1.0",

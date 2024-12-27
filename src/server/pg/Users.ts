@@ -1,7 +1,7 @@
 import { DatabaseError, type QueryResult } from 'pg';
 import type { UserDto } from '../models/UserDto';
 import { client } from '../db';
-import { UserError } from '../errors';
+import { PGError } from '../errors';
 
 function mapUserResult(res: QueryResult): UserDto[] {
   return res.rows.map((r) => ({
@@ -22,16 +22,16 @@ export async function createUser(username: string, hashedPassword: string) {
     return await client.query(sql);
   } catch (error: unknown) {
     if (error instanceof DatabaseError) {
-      throw new UserError(error.code, UserError.USER_EXISTS_MESSAGE);
+      throw new PGError(error.code, PGError.USER_EXISTS_MESSAGE);
     }
     throw error;
   }
 }
 
-export async function getUserByName(username: string): Promise<UserDto[]> {
+export async function getUserByName(username: string): Promise<UserDto> {
   const sql = `
         SELECT * FROM USERS
         WHERE username = '${username}';`;
   const res = await client.query(sql);
-  return mapUserResult(res);
+  return mapUserResult(res)[0];
 }

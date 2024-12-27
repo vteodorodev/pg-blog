@@ -5,10 +5,14 @@ export class ServerError {
     this.message = message ?? '';
   }
 
-  static GENERIC_ERROR_MESSAGE = 'Something went wrong';
+  static INTERNAL_ERROR = 'Internal Server Error';
+
+  static INVALID_CREDENTIALS = 'Invalid credentials';
+
+  static UNAUTHORIZED = 'Unauthorized';
 }
 
-export class UserError extends ServerError {
+export class PGError extends ServerError {
   code: string | undefined;
 
   constructor(code: string | undefined, message: string) {

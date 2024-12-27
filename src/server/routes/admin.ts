@@ -1,16 +1,18 @@
-import { Router } from 'express';
-
-import { hash } from 'bcrypt';
-
-import { UserError, ServerError } from '../errors';
-
 import {
-  countPosts,
-  getPostById,
-  getPosts,
-  searchPostByString,
-} from '../pg/Post';
-import { createUser } from '../pg/Users';
+  type NextFunction,
+  type Request,
+  type Response,
+  Router,
+} from 'express';
+
+import { compare } from 'bcrypt';
+
+import { type Secret, sign } from 'jsonwebtoken';
+
+import { ServerError } from '../errors';
+
+import { getUserByName } from '../pg/Users';
+import { authMiddleware } from '../middlewares';
 
 const router = Router();
 
@@ -20,6 +22,8 @@ const defaultLocals = {
   title: 'Admin',
   description: 'Simple blog created with NodeJs and MongoDb',
 };
+
+const jwtSecret = process.env.JWT_SECRET as Secret;
 
 /*
  * GET /
@@ -46,12 +50,35 @@ router.get('/admin', async (req, res) => {
  */
 
 router.post('/admin', async (req, res) => {
+  const { username, password } = req.body;
+
   try {
-    const { username, password } = req.body;
-    console.log(req.body);
+    const user = await getUserByName(username);
+
+    if (!user) {
+      res.status(401).json(new ServerError(ServerError.INVALID_CREDENTIALS));
+      return;
+    }
+
+    const isPasswordValid = await compare(password, user.password);
+
+    if (!isPasswordValid) {
+      res.status(401).json(new ServerError(ServerError.INVALID_CREDENTIALS));
+      return;
+    }
+
+    const token = sign({ userId: user.id }, jwtSecret);
+
+    res.cookie('token', token, { httpOnly: true });
+
+    res.redirect('/dashboard');
   } catch (error) {
-    console.log(error);
+    res.status(500).json(new ServerError(ServerError.INTERNAL_ERROR));
   }
+});
+
+router.get('/dashboard', authMiddleware, async (req, res) => {
+  res.render('admin/dashboard', { layout: adminLayout });
 });
 
 /*
@@ -59,27 +86,28 @@ router.post('/admin', async (req, res) => {
  * Admin Login
  */
 
-router.post('/register', async (req, res) => {
-  try {
-    const { username, password } = req.body;
+// router.post('/register', async (req, res) => {
+//   try {
+//     const { username, password } = req.body;
 
-    const hashedPassword = await hash(password.trim(), 10);
+//     const hashedPassword = await hash(password.trim(), 10);
 
-    try {
-      await createUser(username, hashedPassword);
-    } catch (error) {
-      if (error instanceof UserError && error.code === UserError.USER_EXISTS) {
-        // res.status(409).json(error);
-        res.render('admin/index', { usernameError: true });
-      } else {
-        res
-          .status(500)
-          .json(new ServerError(ServerError.GENERIC_ERROR_MESSAGE));
-      }
-    }
-  } catch (error) {
-    res.status(500).json(new ServerError(ServerError.GENERIC_ERROR_MESSAGE));
-  }
-});
+//     try {
+//       res.redirect('/admin');
+//       await createUser(username, hashedPassword);
+//     } catch (error) {
+//       if (error instanceof UserError && error.code === UserError.USER_EXISTS) {
+//         // res.status(409).json(error);
+//         res.render('admin/index', { usernameError: true });
+//       } else {
+//         res
+//           .status(500)
+//           .json(new ServerError(ServerError.GENERIC_ERROR_MESSAGE));
+//       }
+//     }
+//   } catch (error) {
+//     res.status(500).json(new ServerError(ServerError.GENERIC_ERROR_MESSAGE));
+//   }
+// });
 
 module.exports = router;

@@ -46,25 +46,6 @@ connectClient()
     console.log(error);
   });
 
-app.get('/get_posts', async (req: Request, res: Response) => {
-  try {
-    const data = await getPostFromUser('trees');
-    res.status(200).json({ data });
-  } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
-  }
-});
-
-app.get('/user/:id', async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id;
-    const data = await getUserByName(id);
-    res.status(200).json({ data: data[0] });
-  } catch (error) {
-    res.status(500).json({ message: 'Something went wrong' });
-  }
-});
-
 function main() {
   app.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);

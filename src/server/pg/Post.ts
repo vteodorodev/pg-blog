@@ -62,13 +62,11 @@ export async function countPosts(): Promise<number> {
   return res.rows[0].count;
 }
 
-export async function getPostFromUser(username: string): Promise<PostDto[]> {
-  const res = await client.query(`
-            SELECT user_id, username, title, content 
-            FROM posts INNER JOIN users 
-            ON Users.id = Posts.user_id 
-            WHERE username = '${username}';`);
-  return mapPostResult(res);
+export async function addPost(title: string, body: string, userId: number) {
+  const createdOn = new Date().toISOString();
+  const updatedOn = createdOn;
+  const sql = `
+    INSERT INTO posts (title, content, created_on, updated_on, user_id)
+    VALUES ('${title}', '${body}', '${createdOn}', '${updatedOn}', ${userId});`;
+  return await client.query(sql);
 }
-
-export async function addPost() {}

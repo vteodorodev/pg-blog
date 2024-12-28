@@ -20,7 +20,7 @@ const defaultLocals = {
 
 router.get('/', async (req, res) => {
   const locals = defaultLocals;
-  const perPage = 2;
+  const perPage = 5;
   const page = Number.parseInt(req.query.page as string) || 1;
 
   const offset = (page - 1) * perPage;

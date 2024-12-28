@@ -9,7 +9,7 @@ import { ServerError } from '../errors';
 import { getUserByName } from '../pg/Users';
 import { authMiddleware } from '../middlewares';
 import type { DecodedToken } from '../types';
-import { getAllPosts, getPosts } from '../pg/Post';
+import { addPost, getAllPosts, getPosts } from '../pg/Post';
 
 const router = Router();
 
@@ -85,7 +85,10 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
     const data = await getAllPosts();
     res.render('admin/dashboard', { layout: adminLayout, data, locals });
     return;
-  } catch {}
+  } catch {
+    res.status(500).json(new Error(ServerError.INTERNAL_ERROR));
+    return;
+  }
 });
 
 /*
@@ -99,7 +102,36 @@ router.get('/add-post', authMiddleware, async (req, res) => {
     const data = await getAllPosts();
     res.render('admin/add-post', { layout: adminLayout, locals });
     return;
-  } catch {}
+  } catch {
+    res.status(500).json(new Error(ServerError.INTERNAL_ERROR));
+    return;
+  }
+});
+
+/*
+ * POST /
+ * Create Post
+ */
+
+router.post('/add-post', authMiddleware, async (req, res) => {
+  const userId = req.userId;
+  const { title, body } = req.body;
+
+  if (!userId) {
+    res.status(500).json(new Error(ServerError.INTERNAL_ERROR));
+    return;
+  }
+
+  try {
+    await addPost(title, body, userId);
+    console.log('created');
+    res.redirect('/dashboard');
+    return;
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(new Error(ServerError.INTERNAL_ERROR));
+    return;
+  }
 });
 
 /*

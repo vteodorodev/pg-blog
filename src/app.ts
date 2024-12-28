@@ -5,8 +5,6 @@ import methodOverride from 'method-override';
 import expressLayout from 'express-ejs-layouts';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
-import { getPostFromUser } from './server/pg/Post';
-import { getUserByName } from './server/pg/Users';
 import { connectClient } from './server/db';
 
 dotenv.config();

@@ -12,6 +12,16 @@ function mapPostResult(res: QueryResult): PostDto[] {
   }));
 }
 
+export async function getAllPosts(): Promise<PostDto[]> {
+  const sql = `
+    SELECT id,title, content, created_on, updated_on
+    FROM posts
+    ORDER BY created_on DESC;
+  `;
+  const res = await client.query(sql);
+  return mapPostResult(res);
+}
+
 export async function getPosts(
   amount: number,
   offset: number,

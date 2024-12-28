@@ -1,9 +1,4 @@
-import {
-  type NextFunction,
-  type Request,
-  type Response,
-  Router,
-} from 'express';
+import { Router } from 'express';
 
 import { compare } from 'bcrypt';
 
@@ -13,6 +8,8 @@ import { ServerError } from '../errors';
 
 import { getUserByName } from '../pg/Users';
 import { authMiddleware } from '../middlewares';
+import type { DecodedToken } from '../types';
+import { getAllPosts, getPosts } from '../pg/Post';
 
 const router = Router();
 
@@ -67,7 +64,7 @@ router.post('/admin', async (req, res) => {
       return;
     }
 
-    const token = sign({ userId: user.id }, jwtSecret);
+    const token = sign({ userId: user.id } as DecodedToken, jwtSecret);
 
     res.cookie('token', token, { httpOnly: true });
 
@@ -77,8 +74,32 @@ router.post('/admin', async (req, res) => {
   }
 });
 
+/*
+ * GET /
+ * Admin Dashboard
+ */
+
 router.get('/dashboard', authMiddleware, async (req, res) => {
-  res.render('admin/dashboard', { layout: adminLayout });
+  const locals = defaultLocals;
+  try {
+    const data = await getAllPosts();
+    res.render('admin/dashboard', { layout: adminLayout, data, locals });
+    return;
+  } catch {}
+});
+
+/*
+ * GET /
+ * Create Post
+ */
+
+router.get('/add-post', authMiddleware, async (req, res) => {
+  const locals = { ...defaultLocals, title: 'Add Post' };
+  try {
+    const data = await getAllPosts();
+    res.render('admin/add-post', { layout: adminLayout, locals });
+    return;
+  } catch {}
 });
 
 /*

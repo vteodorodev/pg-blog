@@ -1,28 +1,17 @@
 import type { NextFunction, Request, Response } from 'express';
 
-import {
-  type PrivateKey,
-  type Secret,
-  type PublicKey,
-  sign,
-  verify,
-} from 'jsonwebtoken';
+import { type Secret, verify } from 'jsonwebtoken';
 import { ServerError } from './errors';
 import type { UserDto } from './models/UserDto';
+import type { DecodedToken } from './types';
 
 const jwtSecret = process.env.JWT_SECRET as Secret;
 
-interface AuthRequest extends Request {
-  userId: number | undefined;
-}
-
 export const authMiddleware = (
-  expressRequest: Request,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  // Is this the best way to add the token to the request?
-  const req = expressRequest as AuthRequest;
   const token = req.cookies.token;
 
   if (!token) {
@@ -31,9 +20,9 @@ export const authMiddleware = (
   }
 
   try {
-    const decoded = verify(token, jwtSecret) as UserDto;
+    const decoded = verify(token, jwtSecret) as DecodedToken;
 
-    req.userId = decoded.id;
+    req.userId = decoded.userId;
 
     next();
   } catch (error) {

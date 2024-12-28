@@ -2,4 +2,7 @@
 
 <article class="article">
     <%= data.body %>
+    <% if (data.updated) { %>
+        <div class="article__date">Updated on <%= data.updatedOn.toDateString() %></div>
+    <% } %>
 </article>

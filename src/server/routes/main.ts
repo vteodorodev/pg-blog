@@ -5,6 +5,7 @@ import {
   getPosts,
   searchPostByString,
 } from '../pg/Post';
+import { ServerError } from '../errors';
 
 const router = Router();
 
@@ -41,6 +42,7 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    res.status(500).json(new Error(ServerError.INTERNAL_ERROR));
   }
 });
 
@@ -55,10 +57,10 @@ router.get('/post/:id', async (req, res) => {
   try {
     const data = await getPostById(postId);
     const locals = { ...defaultLocals, title: data.title };
-    console.log(data);
     res.render('post', { locals, data });
   } catch (error) {
     console.log(error);
+    res.status(500).json(new Error(ServerError.INTERNAL_ERROR));
   }
 });
 

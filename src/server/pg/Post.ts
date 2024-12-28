@@ -9,6 +9,7 @@ function mapPostResult(res: QueryResult): PostDto[] {
     body: r.content,
     createdOn: r.created_on,
     updatedOn: r.updated_on,
+    updated: r.updated,
   }));
 }
 
@@ -26,7 +27,7 @@ export async function getPosts(
   amount: number,
   offset: number,
 ): Promise<PostDto[]> {
-  const sql = `SELECT id,title, content, created_on, updated_on
+  const sql = `SELECT id,title, content, created_on, updated_on, updated
                FROM posts
                ORDER BY created_on DESC
                LIMIT ${amount}
@@ -37,7 +38,7 @@ export async function getPosts(
 }
 
 export async function getPostById(id: number): Promise<PostDto> {
-  const sql = `SELECT id, title, content, created_on, updated_on
+  const sql = `SELECT id, title, content, created_on, updated_on, updated
                FROM posts
                WHERE id = ${id};
               `;
@@ -68,5 +69,14 @@ export async function addPost(title: string, body: string, userId: number) {
   const sql = `
     INSERT INTO posts (title, content, created_on, updated_on, user_id)
     VALUES ('${title}', '${body}', '${createdOn}', '${updatedOn}', ${userId});`;
+  return await client.query(sql);
+}
+
+export async function editPost(title: string, body: string, postId: number) {
+  const updatedOn = new Date().toISOString();
+  const sql = `
+    UPDATE posts 
+    SET title = '${title}', content = '${body}', updated_on = '${updatedOn}', updated = true
+    WHERE id=${postId};`;
   return await client.query(sql);
 }

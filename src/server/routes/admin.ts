@@ -9,7 +9,7 @@ import { ServerError } from '../errors';
 import { getUserByName } from '../pg/Users';
 import { authMiddleware } from '../middlewares';
 import type { DecodedToken } from '../types';
-import { addPost, getAllPosts, getPosts } from '../pg/Post';
+import { addPost, editPost, getAllPosts, getPostById } from '../pg/Post';
 
 const router = Router();
 
@@ -38,6 +38,8 @@ router.get('/admin', async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    res.status(500).json(new Error(ServerError.INTERNAL_ERROR));
+    return;
   }
 });
 
@@ -70,7 +72,9 @@ router.post('/admin', async (req, res) => {
 
     res.redirect('/dashboard');
   } catch (error) {
-    res.status(500).json(new ServerError(ServerError.INTERNAL_ERROR));
+    console.log(error);
+    res.status(500).json(new Error(ServerError.INTERNAL_ERROR));
+    return;
   }
 });
 
@@ -84,10 +88,9 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
   try {
     const data = await getAllPosts();
     res.render('admin/dashboard', { layout: adminLayout, data, locals });
-    return;
-  } catch {
+  } catch (error) {
+    console.log(error);
     res.status(500).json(new Error(ServerError.INTERNAL_ERROR));
-    return;
   }
 });
 
@@ -99,12 +102,10 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
 router.get('/add-post', authMiddleware, async (req, res) => {
   const locals = { ...defaultLocals, title: 'Add Post' };
   try {
-    const data = await getAllPosts();
     res.render('admin/add-post', { layout: adminLayout, locals });
-    return;
-  } catch {
+  } catch (error) {
+    console.log(error);
     res.status(500).json(new Error(ServerError.INTERNAL_ERROR));
-    return;
   }
 });
 
@@ -124,13 +125,53 @@ router.post('/add-post', authMiddleware, async (req, res) => {
 
   try {
     await addPost(title, body, userId);
-    console.log('created');
     res.redirect('/dashboard');
-    return;
   } catch (error) {
     console.log(error);
     res.status(500).json(new Error(ServerError.INTERNAL_ERROR));
+  }
+});
+
+/*
+ * GET /
+ * Edit Post
+ */
+
+router.get('/edit-post/:id', authMiddleware, async (req, res) => {
+  const locals = { ...defaultLocals, title: 'Edit Post' };
+  const postId = Number.parseInt(req.params.id as string);
+
+  try {
+    const data = await getPostById(postId);
+
+    res.render('admin/edit-post', { layout: adminLayout, locals, data });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(new Error(ServerError.INTERNAL_ERROR));
+  }
+});
+
+/*
+ * PUT /
+ * Edit Post
+ */
+
+router.put('/edit-post/:id', authMiddleware, async (req, res) => {
+  const userId = req.userId;
+  const postId = Number.parseInt(req.params.id as string);
+  const { title, body } = req.body;
+
+  if (!userId) {
+    res.status(500).json(new Error(ServerError.INTERNAL_ERROR));
     return;
+  }
+
+  try {
+    await editPost(title, body, postId);
+    res.redirect('/dashboard');
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(new Error(ServerError.INTERNAL_ERROR));
   }
 });
 

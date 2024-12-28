@@ -5,5 +5,5 @@ export type PostDto = {
   body: string;
   updatedOn: Date;
   createdOn: Date;
-  // userId: number;
+  updated: boolean;
 };

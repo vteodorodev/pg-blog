@@ -9,7 +9,13 @@ import { ServerError } from '../errors';
 import { getUserByName } from '../pg/Users';
 import { authMiddleware } from '../middlewares';
 import type { DecodedToken } from '../types';
-import { addPost, editPost, getAllPosts, getPostById } from '../pg/Post';
+import {
+  addPost,
+  deletePost,
+  editPost,
+  getAllPosts,
+  getPostById,
+} from '../pg/Post';
 
 const router = Router();
 
@@ -157,22 +163,45 @@ router.get('/edit-post/:id', authMiddleware, async (req, res) => {
  */
 
 router.put('/edit-post/:id', authMiddleware, async (req, res) => {
-  const userId = req.userId;
   const postId = Number.parseInt(req.params.id as string);
   const { title, body } = req.body;
 
-  if (!userId) {
-    res.status(500).json(new Error(ServerError.INTERNAL_ERROR));
-    return;
-  }
-
   try {
     await editPost(title, body, postId);
+    res.redirect(`/post/${postId}`);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(new Error(ServerError.INTERNAL_ERROR));
+  }
+});
+
+/*
+ * DELETE /
+ * Delete Post
+ */
+
+router.delete('/delete-post/:id', authMiddleware, async (req, res) => {
+  const postId = Number.parseInt(req.params.id as string);
+
+  try {
+    await deletePost(postId);
     res.redirect('/dashboard');
   } catch (error) {
     console.log(error);
     res.status(500).json(new Error(ServerError.INTERNAL_ERROR));
   }
+});
+
+/*
+ * GET /
+ * Logout
+ */
+
+router.get('/logout', authMiddleware, async (req, res) => {
+  const postId = Number.parseInt(req.params.id as string);
+
+  res.clearCookie('token');
+  res.redirect('/');
 });
 
 /*

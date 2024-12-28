@@ -11,7 +11,7 @@
             </a>
             <div class="admin-post-controls">
                 <a href="/edit-post/<%= post.id %>" class="btn">Edit</a>
-                <form action="/delete-post/<%= post._id %>?_method=DELETE" method="post">
+                <form action="/delete-post/<%= post.id %>?_method=DELETE" method="post">
                     <input type="submit" value="Delete" class="btn btn-delete">
                 </form>
             </div>

@@ -80,3 +80,10 @@ export async function editPost(title: string, body: string, postId: number) {
     WHERE id=${postId};`;
   return await client.query(sql);
 }
+
+export async function deletePost(postId: number) {
+  const sql = `
+    DELETE FROM posts 
+    WHERE id=${postId};`;
+  return await client.query(sql);
+}
